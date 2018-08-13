@@ -1,16 +1,19 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.24;
 import "./SafeMath.sol";
 import "./Ownable.sol";
 import "./ParticipantManager.sol";
+import "./Roles.sol";
+//import "./RBAC.sol";
 
 
-contract ParticipantFactory is Ownable {
+
+contract ParticipantFactory is Ownable /* , RBAC */{
 
     using SafeMath for uint;
     using SafeMath for int;
    
     address[] public participantsList;
-    address public FACTORY_ADDRESS = this;
+   
     address public FACTORY_OWNER;
     address public DEFAULT_VALIDATOR;
 
@@ -30,27 +33,18 @@ contract ParticipantFactory is Ownable {
         FACTORY_OWNER = msg.sender;
         DEFAULT_VALIDATOR = msg.sender;
         tokenAddress = _tokenAddress;
+       // addRole(this,"FOUNDATION");
         
     }
     
  
-  
-     function setTest(uint a) public {
-        test = a;
-       
-    }
-    
-    function getTest() public view returns(uint) {
-        return test ;
-    }
-    
     //address defaultFactoryOwner = 0xca35b7d915458ef540ade6068dfe2f44e8fa733c;
     string DEFAULT_TYPE="A";
     string DEFAULT_PARTICIPANT_NAME="GUIFI";
     
     function createChildParticipant(address _participantOwner) public onlyOwner {
       // insert check if the sent ether is enough to cover the car asset ...
-        address newParticipant = new ParticipantManager(DEFAULT_PARTICIPANT_NAME, _participantOwner, FACTORY_ADDRESS, FACTORY_OWNER, DEFAULT_VALIDATOR, tokenAddress);            
+        address newParticipant = new ParticipantManager(DEFAULT_PARTICIPANT_NAME, _participantOwner,this, FACTORY_OWNER, DEFAULT_VALIDATOR, tokenAddress);            
         participantsList.push(newParticipant);   
        // emit newParticipantCreated(newParticipant, "0xca35b7d915458ef540ade6068dfe2f44e8fa733c");
    }

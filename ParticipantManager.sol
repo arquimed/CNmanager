@@ -1,8 +1,10 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.24;
 import "./SafeMath.sol";
 import "./ParticipantFactory.sol";
 import "./IBT.sol";
+import "./CrowdsaleIBT.sol";
 
+//ESTAT ON M'HE QUEDAT: HE CONSEGUIT QUE AQUEST SC PUGUI CRIDAR LA FUNCIÓ DE MIN DEL IBT I REBRE ELS NOUS TOKENS ASSIGNATS. FALTARÁ AFEGIR FUNCIÓ DE TRANSFERIR FONS D'AQUEST CONTRACTE AL CONTRACTE DE CROWDSALE I TOTA LA DINAMICA DE CLIENTS.
 contract ParticipantManager {
     
     ParticipantFactory factory;
@@ -13,6 +15,10 @@ contract ParticipantManager {
     using SafeMath for int256;
     using SafeMath for int;
 
+    function() external payable {
+        //EMPTY FALLBACK FUNCTION IS ADDED BECAUSE WE NEED THE CONTRACT TO ACCEPT ETH FROM CROWDSALE CONTRACTS
+    }
+    
     modifier onlyParticipant() {
         require(msg.sender == ownerParticipant);
         _;
@@ -38,6 +44,7 @@ contract ParticipantManager {
         factory = ParticipantFactory(_factoryAddress);
     
         token = IBT(_tokenAddress);
+        IBT_TokenAddress = _tokenAddress;
         
       
     }
@@ -47,11 +54,16 @@ contract ParticipantManager {
     address public factoryContractAddress;
     address public factoryOwner;
     address public validator;
+    address public IBT_TokenAddress;
     address[] activeCustomers;
+    mapping (address => uint) public customerRevenue;
+    address[] public activeCrowdsalesList;
     string public  participantType;
     string public  name;
     uint public  totalExpensesCost;
+    uint public participantBalanceInWei= address(participantContractAddress).balance;
     uint public totalValidatedExpenses;
+    uint public IBT_MARKET_RATE_IN_WEI=1;
     uint public numExpenses;
     uint private expenseId;
     
@@ -61,6 +73,8 @@ contract ParticipantManager {
     event ValidatedExpense (address indexed participantContractAddress, address indexed validator, uint ammount);
     event newAssetEvent (address indexed participantContractAddress, uint ammountCapex, uint ammountCapexToBeFunded );
     event newConsumptionUpdated (address indexed _participantContractAddress, uint _newConsumptionTB);
+    event CrowdsaleCreated (address indexed __participantContractAddress, address _CrowdsaleContractAddress);
+    event CrowdsaleFunded(address indexed __participantContractAddress, address _CrowdsaleContractAddress, uint _ammount);
     
     //Class Declaration
     mapping (uint => Expense) public expenses;
@@ -125,11 +139,32 @@ contract ParticipantManager {
         
     // TOKEN RELATED METHODS: MINT, TRANSFER
     function mintNewIBT (uint _mintedIBT) public onlyParticipant returns (bool success){
-        token.mint(participantContractAddress, _mintedIBT);
+        token.mint(this, _mintedIBT);
         return true;
         
    }
+    
+    function updateTokenRate (uint _newRateInETH) public onlyParticipant returns (bool success){
+        IBT_MARKET_RATE_IN_WEI = _newRateInETH;
+        return true;
         
+    }
+    
+    
+    function createNewCrowdsale () public onlyParticipant returns (bool success){
+        address newCrowdsale = new CrowdsaleIBT(IBT_MARKET_RATE_IN_WEI,this, token);   
+        activeCrowdsalesList.push(newCrowdsale);
+        emit CrowdsaleCreated(this, newCrowdsale);
+        return true;
+        
+    }
+    
+    
+    function addIBTtoCrowdsaleContract (uint _CrowdsaleId, uint _ammount) public onlyParticipant returns (bool success){
+        token.transfer(activeCrowdsalesList[_CrowdsaleId], _ammount );
+        emit CrowdsaleFunded(this, activeCrowdsalesList[_CrowdsaleId], _ammount);
+        return true;
+    }
         
     
 
@@ -182,6 +217,16 @@ contract ParticipantManager {
         
     }
     
+  
+    function extendService(uint _payment) public returns (bool success){
+        token.transferFrom(msg.sender, this, _payment);
+        customerRevenue[msg.sender]+= _payment;
+        
+        return success;
+        
+        
+    }
+    
     //STATE modifying functions
      enum AssetStatus { Working, Planned, Inactive, Testing, Building, Reserved, Dropped} AssetStatus status;
 
@@ -224,23 +269,4 @@ contract ParticipantManager {
         
     }
     
-    
-    
-    
-   
-    
-    //TEST FUNCTIONS FOR GETTING / SETTING INFORMATION FROM / TO PARTICIPANT FACTORY
-   function factorySetTest(uint a) public returns(bool success) {
-       factory.setTest(a);
-       return true;
-   }
-   
-      //TEST FUNCTIONS FOR GETTING / SETTING INFORMATION FROM / TO PARTICIPANT FACTORY
-   function factoryGetTest() public view returns(uint) {
-        return factory.getTest();
-   }
-   
- 
-   
-   
 }

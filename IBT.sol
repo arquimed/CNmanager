@@ -29,9 +29,9 @@ contract IBT is ERC20, Ownable {
   constructor() public {
     name = "Internet Bandwidth Token";
     symbol = "IBT";
-    decimals = 4;
-    balances[msg.sender]=1000000000000000000;
-    totalSupply_=1000000000000000000;
+    decimals = 18;
+   // balances[msg.sender]=1000000000000000000;
+   // totalSupply_=1000000000000000000;
   }
 
   /**
