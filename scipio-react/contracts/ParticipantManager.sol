@@ -268,10 +268,12 @@ contract ParticipantManager {
     function UpdateConsumptionTB(uint consumptionTB) public onlyParticipant returns (bool success){
         //assets[i].totalConsumptionTB = consumptionTB;
         totalConsumptions+=consumptionTB;
+        factory.setNewConsumption(this,consumptionTB);
         emit newConsumptionUpdated(this, consumptionTB, now);
         return success;
         
     }
+    
     
     
     function getSummary() public view returns (

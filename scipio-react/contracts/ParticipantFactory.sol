@@ -21,11 +21,13 @@ contract ParticipantFactory is Ownable /* , RBAC */{
     mapping(address => uint) public participantConsumption;
     mapping(address => uint) public participantContribution;
     mapping(address => uint) public participantIncome;
+    mapping(address => bool) public isParticipant;
    
     
     address validator;
     address tokenAddress;
     uint public test;
+    uint private counter=0;
     
     event newParticipantCreated (address indexed newParticipantAddress, address indexed owner);
     
@@ -46,6 +48,7 @@ contract ParticipantFactory is Ownable /* , RBAC */{
       // insert check if the sent ether is enough to cover the car asset ...
         address newParticipant = new ParticipantManager(_nameParticipant, _participantOwner,this, FACTORY_OWNER, DEFAULT_VALIDATOR, tokenAddress);            
         participantsList.push(newParticipant);   
+        isParticipant[newParticipant]=true;
         emit newParticipantCreated(newParticipant, _participantOwner);
    }
 
@@ -60,15 +63,26 @@ contract ParticipantFactory is Ownable /* , RBAC */{
     }*/
     
     
-    function setNewExpense (address _participant, uint _expense) public {
-       
+    function setNewExpense (address _participant, uint _expense) public returns (bool success) {
         participantContribution[_participant] =  participantContribution[_participant].add(_expense);
-      
-        
+        return true;
     }
     
      
-    
-    
-    
+    function setNewConsumption (address _participant, uint _contribution) public returns (bool success) {
+        require(isParticipant[_participant]== true);
+        participantConsumption[_participant] =  participantConsumption[_participant].add(_contribution);
+        return true;
+    }
+   
+  
+    address private toBeResetParticipant;
+    function resetParticipantStates () public onlyOwner returns (bool success){
+       for (uint i=0; i<participantsList.length; i++) {
+            toBeResetParticipant=participantsList[i];
+            participantContribution[toBeResetParticipant]=0;
+            participantConsumption[toBeResetParticipant]=0;
+        }
+        return success;
+    }
 }
