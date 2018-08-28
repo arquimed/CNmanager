@@ -34,7 +34,8 @@ contract('IBT test', async (accounts) => {
   it("should Create Child Participant and deploy new contract", async () => {
     let token = await Token.deployed(); 
     let factory = await Factory.deployed();
-    let newParticipant = await factory.createChildParticipant(accounts[1], {from: accounts[0]});
+    let participantName="Neuer";
+    let newParticipant = await factory.createChildParticipant(participantName, accounts[1], {from: accounts[0]});
 
     //let participantName = await newParticipant.name.call();
     //console.log(newParticipant);
@@ -45,18 +46,20 @@ contract('IBT test', async (accounts) => {
   it("should Create Child Participant with GUIFI as name using ASYNC AWAIT", async () => {
     let token = await Token.deployed(); 
     let factory = await Factory.deployed();
-    let newParticipant = await factory.createChildParticipant(accounts[1], {from: accounts[0]});
+    let participantName="Neuer";
+    let newParticipant = await factory.createChildParticipant(participantName, accounts[1], {from: accounts[0]});
     let pAddress = await newParticipant.logs[0].args.newParticipantAddress;
     let newInstance = await Participant.at(pAddress);
-    let name = await newInstance.name.call();
-    assert.equal("GUIFI",name);
+    let name = await newInstance.nameParticipant.call();
+    assert.equal("Neuer",name);
     //assert.equal("GUIFI", participantName);
   });
 
   it("should add minter role to IBT contract", async () => {
     let token = await Token.deployed(); 
     let factory = await Factory.deployed();
-    let newParticipant = await factory.createChildParticipant(accounts[1], {from: accounts[0]});
+    let participantName="Neuer";
+    let newParticipant = await factory.createChildParticipant(participantName, accounts[1], {from: accounts[0]});
     let pAddress = await newParticipant.logs[0].args.newParticipantAddress;
     await token.addMinter(pAddress, {from: accountFoundation});
     //let approved = await token.allowedToMint[pAddress].call();
@@ -66,7 +69,7 @@ contract('IBT test', async (accounts) => {
       // If this callback is called, the call was successfully executed.
       // Note that this returns immediately without any waiting.
       // Let's print the return value.
-      console.log(approved);
+      //console.log(approved);
       return approved;
       
     });
@@ -80,22 +83,23 @@ contract('IBT test', async (accounts) => {
     let token = await Token.deployed(); 
     let factory = await Factory.deployed();
     //creation of child participant using Factory
-    let newParticipant = await factory.createChildParticipant(accountParticipant, {from: accountFoundation});
+    let participantName="Neuer";
+    let newParticipant = await factory.createChildParticipant(participantName, accounts[1], {from: accounts[0]});
 
     //creation of newParticipant instance of deployed contract
     let pAddress = await newParticipant.logs[0].args.newParticipantAddress;
     let newInstance = await Participant.at(pAddress);
     
-    console.log(`The address of the newly created participant contract is ${pAddress}`);
+    //console.log(`The address of the newly created participant contract is ${pAddress}`);
     //adds participant contract address to list of allowed minting addresses
-    await token.addMinter(pAddress, {from: accountFoundation});
+    await token.addMinter(accounts[1], {from: accountFoundation});
     
     //checks that the address has been added succesfully 
-    let isApproved = await token.checkMinter.call(pAddress, {from: accountFoundation}).then(function(approved) {
+    let isApproved = await token.checkMinter.call(accounts[1], {from: accountFoundation}).then(function(approved) {
       // If this callback is called, the call was successfully executed.
       // Note that this returns immediately without any waiting.
       // Let's print the return value.
-      console.log(`The address ${pAddress} is approved for minting new IBT (${approved})`);
+      //console.log(`The address ${accounts[1]} is approved for minting new IBT (${approved})`);
       return approved;
     });
 
@@ -106,27 +110,28 @@ contract('IBT test', async (accounts) => {
     //console.log(`isminted value is ${isMinted}`)
        
     //check that the newly minted tokens are in the participant contract balance.
-    let amountMinted = await token.mint(pAddress, newIBT, {from: accountParticipant}).then(function(result) {
+    let amountMinted = await token.mint(accounts[1], newIBT, {from: accounts[1]}).then(function(result) {
         let beneficiary = result.logs[0].args.to;
         let amountMinted = result.logs[0].args.amount;
-        console.log(`the beneficiary ${beneficiary} minted and received ${amountMinted.toNumber()} tokens`);
+        //console.log(`the beneficiary ${beneficiary} minted and received ${amountMinted.toNumber()} tokens`);
         return amountMinted;
     }); 
     
-    
-    token.balanceOf.call(pAddress, {from: accountParticipant}).then(function(result){
-        console.log(`Balance of Participant Contract Address ${pAddress} is ${result} tokens`);
+    token.balanceOf.call(accounts[1], {from: accounts[1]}).then(function(result){
+        console.log(`Balance of Account 1 ${accounts[1]} is ${result} tokens`);
         let newBalance = result;
         assert.equal(1000000000000000,newBalance);
     });
   });
 
+  
   it("should Mint, create new Crowdsale Contract and allow third account to purchase tokens from it", async () => {
     // parent contract initialization
     let token = await Token.deployed(); 
     let factory = await Factory.deployed();
     //creation of child participant using Factory
-    let newParticipant = await factory.createChildParticipant(accountParticipant, {from: accountFoundation});
+    let participantName="Neuer";
+    let newParticipant = await factory.createChildParticipant(participantName, accounts[1], {from: accounts[0]});
 
     //creation of newParticipant instance of deployed contract
     let pAddress = await newParticipant.logs[0].args.newParticipantAddress;
@@ -134,14 +139,14 @@ contract('IBT test', async (accounts) => {
     
     console.log(`The address of the newly created participant contract is ${pAddress}`);
     //adds participant contract address to list of allowed minting addresses
-    await token.addMinter(pAddress, {from: accountFoundation});
+    await token.addMinter(accounts[1], {from: accountFoundation});
     
     //checks that the address has been added succesfully 
-    let isApproved = await token.checkMinter.call(pAddress, {from: accountFoundation}).then(function(approved) {
+    let isApproved = await token.checkMinter.call(accounts[1], {from: accountFoundation}).then(function(approved) {
       // If this callback is called, the call was successfully executed.
       // Note that this returns immediately without any waiting.
       // Let's print the return value.
-      console.log(`The address ${pAddress} is approved for minting new IBT (${approved})`);
+      console.log(`The address ${accounts[1]} is approved for minting new IBT (${approved})`);
       return approved;
     });
 
@@ -154,7 +159,7 @@ contract('IBT test', async (accounts) => {
     //minting of new IBT tokens are assigned to crowdsale contract directly
     let newIBT = 1000000000000000;
          
-    let amountMinted = await token.mint(crowdsaleAddress, newIBT, {from: accountParticipant}).then(function(result) {
+    let amountMinted = await token.mint(crowdsaleAddress, newIBT, {from: accounts[1]}).then(function(result) {
         let beneficiary = result.logs[0].args.to;
         let amountMinted = result.logs[0].args.amount;
         console.log(`the beneficiary ${beneficiary} minted and received ${amountMinted.toNumber()} tokens`);
@@ -165,30 +170,36 @@ contract('IBT test', async (accounts) => {
     token.balanceOf.call(crowdsaleAddress, {from: accountParticipant}).then(function(result){
       console.log(`Balance of Crowdsale Contract Address ${crowdsaleAddress} is ${result} tokens`);
       let crowdsaleBalance = result;
-     //assert.equal(1000000000000000,crowdsaleBalance);
+     assert.equal(1000000000000000,crowdsaleBalance);
     });
+
+ 
     
     //increase approval so that Crowdsale Contract can transfer IBT tokens sold.
     await token.increaseApproval(crowdsaleAddress,amountMinted, {from: accountFoundation});
     let allowance = token.allowance.call(accountFoundation, crowdsaleAddress).then(function(result){
         console.log(`Allowance for CrodsaleAddress ${crowdsaleAddress} is ${result} in wei`);
-        //assert.equal(amountMinted, result);
+        //assert.equal(1000000000000000, result);
         return result;
 
     });
-
-    //purchase 500.000.000.000 weis in tokens
+    
+    //purchase 50000000 weis in tokens
     let purchasedInWei= 50000000;
-    //await crowdsale.buyTokens(customer1, { value: purchasedInWei, from: customer1 });
-    //await crowdsale.buyTokens(accounts[10], {from: accounts[10], value: 5000000, gas:1000000});
-    /*
-    token.balanceOf.call(customer1, {from: customer1}).then(function(result){
-      console.log(`Balance of purchaser with address ${customer1} is ${result} tokens`);
-      let purchaserBalance = result;
-      assert.equal(5000000, purchaserBalance);
-     //assert.equal(1000000000000000,crowdsaleBalance);
-    });*/
+    await crowdsale.buyTokens(customer1, {from: customer1, value: purchasedInWei});
+    let buyTokens = await CrowdsaleIBT.at(crowdsaleAddress).buyTokens(account[10] ,{from: accounts[1], value:50000000});
 
+    //await crowdsale.buyTokens(accounts[10], {from: accounts[10], value: 5000000, gas:1000000});
+    
+    //let newBalance = await token.balanceOf.call(customer1);
+
+    //console.log(`Balance of purchaser with address ${customer1} is ${result} tokens`);
+     
+    assert(buyTokens);
+    //assert.equal(50000000, 500);
+
+
+  
     
   });
 
@@ -197,7 +208,8 @@ contract('IBT test', async (accounts) => {
   it("should create new Crowdsale Contract", async () => {
     let token = await Token.deployed(); 
     let factory = await Factory.deployed();
-    let newParticipant = await factory.createChildParticipant(accounts[1], {from: accounts[0]});
+    let participantName="Neuer";
+    let newParticipant = await factory.createChildParticipant(participantName, accounts[1], {from: accounts[0]});
     let pAddress = await newParticipant.logs[0].args.newParticipantAddress;
     let newInstance = await Participant.at(pAddress);
 
