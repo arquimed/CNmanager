@@ -20,12 +20,12 @@ class ContributeForm extends Component {
 
         try{
             const accounts = await web3.eth.getAccounts();
-            await campaign.methods.contribute().send({
+            await participant.CreateNewAsset().send({
                 from: accounts[0],
                 value: web3.utils.toWei(this.state.value, 'ether')
             });
 
-            Router.replaceRoute(`/campaigns/${this.props.address}`);
+            Router.replaceRoute(`/participants/${this.props.address}`);
         }catch (err){
             this.setState({ errorMessage: err.message });
         }
@@ -37,17 +37,17 @@ class ContributeForm extends Component {
         return (
             <Form onSubmit={this.onSubmit} error={!!this.state.errorMessage}>
                 <Form.Field>
-                    <label>Amount to Contribute</label>
+                    <label>Expense Cost</label>
                     <Input
                         value={this.state.value}
                         onChange={event => this.setState({value: event.target.value})}
-                        label ="ether" 
+                        label ="DAI" 
                         labelPosition="right" 
                     
                     />
                 </Form.Field>
                 <Message error header="Oooops!" content={this.state.errorMessage}/>
-                <Button primary loading={this.state.loading}>Contribute!</Button>
+                <Button primary loading={this.state.loading}>Add Cost</Button>
 
             </Form>
 

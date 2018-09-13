@@ -141,7 +141,7 @@ contract ParticipantManager {
         
     // TOKEN RELATED METHODS: MINT, TRANSFER
     function mintNewIBT (uint _mintedIBT) public onlyParticipant returns (bool success){
-        token.mint(this, _mintedIBT);
+        token.mint(msg.sender, _mintedIBT);
         emit newIBTMinted(this, _mintedIBT);
         return true;
         
@@ -274,7 +274,7 @@ contract ParticipantManager {
         
     }
     
-    
+
     
     function getSummary() public view returns (
        address, string, address, uint, uint, uint, uint 

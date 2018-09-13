@@ -2,21 +2,21 @@ import React, { Component } from 'react';
 import { Button, Table } from 'semantic-ui-react';
 import { Link } from '../../../routes';
 import Layout from '../../../components/Layout';
-import Campaign from '../../../ethereum/campaign';
+import Participant from '../../../participant';
 import RequestRow from '../../../components/RequestRow';
 
-class RequestIndex extends Component {
+class ExpenseIndex extends Component {
   static async getInitialProps(props) {
     const { address } = props.query;
-    const campaign = Campaign(address);
-    const requestCount = await campaign.methods.getRequestsCount().call();
-    const approversCount = await campaign.methods.approversCount().call();
+    const participant = Participant(address);
+    const requestCount = await campaign.methods.getRequestsCount().call();  //method to be changed
+    const approversCount = await campaign.methods.approversCount().call();   //method to be changed
 
     const requests = await Promise.all(
       Array(parseInt(requestCount))
         .fill()
         .map((element, index) => {
-          return campaign.methods.requests(index).call();
+          return participant.methods.requests(index).call();
         })
     );
 
@@ -70,4 +70,4 @@ class RequestIndex extends Component {
   }
 }
 
-export default RequestIndex;
+export default ExpenseIndex;

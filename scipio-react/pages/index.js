@@ -9,7 +9,7 @@ class ParticipantIndex extends Component {
     
    static async getInitialProps() {
         const participants = await factory.getDeployedParticipantContracts();
-        console.log(participants);
+        //console.log(participants);
         return { participants };
     }
    
@@ -38,6 +38,15 @@ class ParticipantIndex extends Component {
                 <h3>Active Participants</h3>
 
                 <Link route="/participants/new">
+                    <a>
+                        <Button
+                            floated ="right"
+                            content="Create Participant"
+                            icon="add circle"
+                            primary   //this equals to primary={true}
+                        />
+                    </a>
+                </Link><Link route="/participants/new">
                     <a>
                         <Button
                             floated ="right"

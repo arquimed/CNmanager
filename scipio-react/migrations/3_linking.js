@@ -1,5 +1,7 @@
 var SafeMath = artifacts.require('SafeMath');
 var IBT = artifacts.require("IBT");
+var StableCoin = artifacts.require("StableCoin");
+var SPT = artifacts.require("SPT");
 var CrowdsaleIBT = artifacts.require("CrowdsaleIBT");
 var ParticipantFactory = artifacts.require("ParticipantFactory");
 var ParticipantManager = artifacts.require("ParticipantManager");
@@ -7,7 +9,7 @@ var accounts = web3.eth.getAccounts(function(err,res){accounts=res;});
 // deployer.deploy(MyContract, { gas: 5000000 })
 module.exports = function(deployer) {
     deployer.deploy(SafeMath);
-    deployer.link(SafeMath, [IBT,CrowdsaleIBT,ParticipantFactory,ParticipantManager]);
+    deployer.link(SafeMath, [IBT,StableCoin,SPT, CrowdsaleIBT,ParticipantFactory,ParticipantManager]);
     
     var a, b;
 
@@ -19,9 +21,7 @@ module.exports = function(deployer) {
         return deployer.deploy(ParticipantFactory, a.address, { gas: 5000000 });
     });/*.then(function(instance){
         factory=instance;
-
         return factory.createChildParticipant(accounts[1], {from: accounts[0]});
-
     });*/
    
     //deployer.deploy([IBT, ParticipantFactory]);
@@ -41,14 +41,12 @@ deployer.then(function() {
   // Set the new instance of A's address on B via B's setA() function.
   return b.setA(a.address);
 });
-
 */
 /*
 // Deploy library LibA, then link LibA to contract B, then deploy B.
 deployer.deploy(LibA);
 deployer.link(LibA, B);
 deployer.deploy(B);
-
 // Link LibA to many contracts
 deployer.link(LibA, [B, C, D]);
 */
